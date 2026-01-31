@@ -1,0 +1,66 @@
+plugins {
+    id 'eclipse'
+    id 'net.neoforged.moddev' version '2.0.107'
+}
+
+version = '1.0'
+group = 'net.darkunity.neweracombat'
+base.archivesName = "neweracombat"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    version = "21.1.190"
+
+    runs {
+        client {
+            client()
+        }
+    }
+
+    mods {
+        neweracombat {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.spongepowered:mixin:0.8.7'
+}
+
+// Магия автоматической починки импортов перед компиляцией
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    
+    // Подавляем лишние варнинги, чтобы видеть только суть
+    options.compilerArgs.addAll([
+        '-Xlint:none',
+        '-nowarn'
+    ])
+
+    // Скрипт-автозамена: если MCreator забыл импорты, Gradle их «вколет» сам
+    doFirst {
+        def mainModFile = file("src/main/java/net/darkunity/neweracombat/NeweracombatMod.java")
+        if (mainModFile.exists()) {
+            def content = mainModFile.text
+            def changed = false
+            
+            if (!content.contains("import net.neoforged.bus.api.IEventBus;")) {
+                content = content.replace("package net.darkunity.neweracombat;", "package net.darkunity.neweracombat;\nimport net.neoforged.bus.api.IEventBus;")
+                changed = true
+            }
+            if (!content.contains("import net.neoforged.bus.api.SubscribeEvent;")) {
+                content = content.replace("package net.darkunity.neweracombat;", "package net.darkunity.neweracombat;\nimport net.neoforged.bus.api.SubscribeEvent;")
+                changed = true
+            }
+            
+            if (changed) {
+                mainModFile.text = content
+                println "--- Gradle: Вколоты недостающие импорты в NeweracombatMod.java ---"
+            }
+        }
+    }
+}
+
+apply from: 'mcreator.gradle'

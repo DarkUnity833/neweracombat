@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.darkunity.neweracombat.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "HumanoidModelMixin",
+    "LivingEntityMixin",
+    "LocalPlayerMixin",
+    "CapeLayerMixin",
+    "MinecraftMixin",
+    "PlayerModelMixin"
+  ], 
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
